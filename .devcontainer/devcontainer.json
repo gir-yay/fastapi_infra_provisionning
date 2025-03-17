@@ -5,7 +5,7 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"dockerComposeFile": "../docker-compose.yml",
 	"service": "api",
-//	"workspaceFolder": "/usr/src/app",
+    "workspaceFolder": "/usr/src/app",
 	"customizations": {
 		"extensions": [
 			"ms-python.python",

@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.9.7
 RUN useradd -m vscode && \
     echo "vscode:vscode" | chpasswd && \
     usermod -aG sudo vscode
@@ -8,7 +8,7 @@ USER vscode
 WORKDIR /usr/src/app
 ENV PATH /home/vscode/.local/bin:${PATH}
 COPY requirements.txt ./
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install fastapi[all]
 RUN pip install pydantic-settings
 COPY . .
