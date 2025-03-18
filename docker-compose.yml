@@ -10,7 +10,7 @@ services:
       - ACCESS_TOKEN_EXPIRE_MINUTES=60
       - DATABASE_URL=db
       - DATABASE_PORT=5432
-      - DATABASE_NAME=fastapi
+      - DATABASE_NAME=postgres
       - DATABASE_ROOT_USER=postgres
       - DATABASE_ROOT_PASSWORD=postgres
 
@@ -25,7 +25,7 @@ services:
     image: postgres
     container_name: postgres_db
     environment:
-      POSTGRES_DB: fastapi
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
