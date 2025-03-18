@@ -1,6 +1,7 @@
 services:
   api:
     build: .
+    container_name: fastapi
     ports:
       - "5000:8000"
     environment:
@@ -9,11 +10,11 @@ services:
       - ACCESS_TOKEN_EXPIRE_MINUTES=60
       - DATABASE_URL=db
       - DATABASE_PORT=5432
-      - DATABASE_NAME=postgres
+      - DATABASE_NAME=fastapi
       - DATABASE_ROOT_USER=postgres
       - DATABASE_ROOT_PASSWORD=postgres
 
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 
 
     volumes:
       - ./:/usr/src/app:rw
@@ -22,8 +23,9 @@ services:
       - db
   db:
     image: postgres
+    container_name: postgres_db
     environment:
-      POSTGRES_DB: postgres
+      POSTGRES_DB: fastapi
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:

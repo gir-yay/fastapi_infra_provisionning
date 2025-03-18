@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from . import models
 from .database import engine
-from .routers import  user
-from .config import settings
+from .routers import  users
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -29,4 +28,4 @@ async def root():
     return {"message": "Hello World "}
 
 
-app.include_router(user.router) 
+app.include_router(users.router) 
