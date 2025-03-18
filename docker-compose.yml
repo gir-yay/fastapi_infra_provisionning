@@ -14,7 +14,7 @@ services:
       - DATABASE_ROOT_USER=postgres
       - DATABASE_ROOT_PASSWORD=postgres
 
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
     volumes:
       - ./:/usr/src/app:rw
