@@ -22,27 +22,7 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-# Better be names PostBase
-class Instance(BaseModel):
-    instance_name: str
     
-
-    
-
-class PostResponse(BaseModel):
-    id : int
-    title : str
-    content : str
-    published : bool
-    owner : UserResponse
-    #created_at : datetime
-
-    class Config:
-        orm_mode = True
-        #from_attributes = True
-
-
-
 
 class Token(BaseModel):
     access_token: str 
@@ -55,3 +35,16 @@ class TokenData(BaseModel):
     
 
 
+class InstanceCreate(BaseModel):
+    instance_name: str
+
+
+class InstanceResponse(BaseModel):
+    id : int
+    instance_name : str
+    instance_public_ip : Optional[str] = None
+    instance_private_ip : Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        #from_attributes = True
