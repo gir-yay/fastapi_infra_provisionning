@@ -18,6 +18,8 @@ RUN pip install passlib[bcrypt]
 RUN pip install python-jose[cryptography]
 RUN pip  install alembic
 RUN pip install pydantic-settings
+RUN pip install python-digitalocean
+
 
 COPY . .
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0",  "--port", "8000"]

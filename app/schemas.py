@@ -42,8 +42,8 @@ class InstanceCreate(BaseModel):
 class InstanceResponse(BaseModel):
     id : int
     instance_name : str
-    instance_public_ip : Optional[str] = None
-    instance_private_ip : Optional[str] = None
+    instance_id : int
+    instance_ip : str
 
     class Config:
         orm_mode = True

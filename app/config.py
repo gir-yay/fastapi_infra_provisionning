@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     DATABASE_NAME: str
     DATABASE_ROOT_USER: str
     DATABASE_ROOT_PASSWORD: str
+    DO_API_KEY: str
 
     class Config:
         env_file = ".env"
