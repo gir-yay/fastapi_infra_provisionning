@@ -74,10 +74,26 @@ def get_user( db: Session = Depends(get_db), current_user: int = Depends(oauth2.
 
 @router.post("/",  status_code=status.HTTP_201_CREATED , response_model=schemas.InstanceResponse)
 def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-
+    instance.instance_id , instance.instance_ip = create_droplet(instance.instance_name)
     new_instance = models.Instances(user_id= current_user.id, **instance.dict())
     db.add(new_instance)
     db.commit()
     db.refresh(new_instance)
     return new_instance
+
+
+@router.delete("/{id}" , status_code=status.HTTP_204_NO_CONTENT)
+def delete_instance(id: int , db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    instance = db.query(models.Instances).filter(models.Instances.id == id).first()
+    
+    if instance:
+        if instance.user_id != current_user.id:
+            raise HTTPException(status_code= status.HTTP_403_FORBIDDEN , detail="Instance does not exist!")
+        db.delete(instance)
+        #post.delete(synchronize_session=False)
+        delete_droplet(instance.instance_id)
+        db.commit()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    raise HTTPException(status_code= status.HTTP_404_NOT_FOUND , detail="Instance not found")
+
 
