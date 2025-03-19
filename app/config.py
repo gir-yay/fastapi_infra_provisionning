@@ -11,6 +11,15 @@ class Settings(BaseSettings):
     DATABASE_ROOT_USER: str
     DATABASE_ROOT_PASSWORD: str
     DO_API_KEY: str
+    VCENTER_HOST: str
+    VCENTER_USER: str
+    VCENTER_PASSWORD: str
+    TEMPLATE_NAME: str
+    DATASTORE_NAME: str 
+    DATACENTER_NAME: str 
+    ESXI_HOSTNAME: str
+    CUSTOMIZATION_SPEC_NAME: str
+
 
     class Config:
         env_file = ".env"

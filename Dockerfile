@@ -19,6 +19,8 @@ RUN pip install python-jose[cryptography]
 RUN pip  install alembic
 RUN pip install pydantic-settings
 RUN pip install python-digitalocean
+RUN pip install pyvmomi
+RUN pip install requests urllib3
 
 
 COPY . .

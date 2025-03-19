@@ -5,6 +5,7 @@ from ..database import  get_db
 from sqlalchemy.orm import Session
 
 from .. import instance_req as instReq
+from .. import vm_req as vmReq
 
 
 router = APIRouter(
@@ -26,7 +27,10 @@ def get_instace( db: Session = Depends(get_db), current_user: int = Depends(oaut
 
 @router.post("/",  status_code=status.HTTP_201_CREATED , response_model=schemas.InstanceResponse)
 def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    instance_id , instance_ip = instReq.create_droplet(instance.instance_name)
+    name = instance.instance_name + "_" + current_user.username
+    instance.instance_name = name
+    instance_id , instance_ip = instReq.create_droplet(name)
+    vmReq.deploy_vm(name)
     new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, **instance.dict())
     db.add(new_instance)
     db.commit()
@@ -44,6 +48,7 @@ def delete_instance(id: int , db: Session = Depends(get_db), current_user: int =
         db.delete(instance)
         #post.delete(synchronize_session=False)
         instReq.delete_droplet(instance.instance_id)
+        vmReq.delete_vm(instance.instance_name)
         db.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     raise HTTPException(status_code= status.HTTP_404_NOT_FOUND , detail="Instance not found")
