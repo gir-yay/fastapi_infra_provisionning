@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from . import models
 from .database import engine
-from .routers import  users, auth
+from .routers import  users, auth, instances
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -25,8 +25,9 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World "}
+    return {"message": "Welcome to the API"}
 
 
 app.include_router(users.router) 
 app.include_router(auth.router) 
+app.include_router(instances.router)
