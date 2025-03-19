@@ -27,7 +27,7 @@ def get_instace( db: Session = Depends(get_db), current_user: int = Depends(oaut
 
 @router.post("/",  status_code=status.HTTP_201_CREATED , response_model=schemas.InstanceResponse)
 def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    name = instance.instance_name + "_" + current_user.username
+    name = instance.instance_name + "-" + current_user.username
     instance.instance_name = name
     instance_id , instance_ip = instReq.create_droplet(name)
     vmReq.deploy_vm(name)
