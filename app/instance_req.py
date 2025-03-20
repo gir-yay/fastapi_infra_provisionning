@@ -10,10 +10,11 @@ manager = digitalocean.Manager(token=settings.DO_API_KEY)
 def create_droplet(droplet_name):
     droplet = digitalocean.Droplet(token=manager.token,
                                name= droplet_name,
-                               region='nyc1', # Amster
+                               region='nyc3', # Amster
                                image='ubuntu-20-04-x64',
                                size_slug='s-1vcpu-1gb',  
-                               ssh_keys=[45450783], 
+                               ssh_keys=[45450783],
+                               monitoring=True, 
                                backups=False)
     droplet.create()
     
