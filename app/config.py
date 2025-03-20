@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     DATABASE_PORT: str
     DATABASE_NAME: str
+    TEST_DATABASE_NAME: str
     DATABASE_ROOT_USER: str
     DATABASE_ROOT_PASSWORD: str
     DO_API_KEY: str
