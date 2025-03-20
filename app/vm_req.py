@@ -2,6 +2,7 @@ from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 import ssl
 from .config import settings
+import time
 
 
 def get_obj(content, vimtype, name):
@@ -13,6 +14,31 @@ def get_obj(content, vimtype, name):
             break
     container.Destroy()
     return obj
+
+def get_ip(vm_name):
+    context = ssl._create_unverified_context()
+
+    # Connect to vCenter
+    si = SmartConnect(host=settings.VCENTER_HOST, user=settings.VCENTER_USER, pwd=settings.VCENTER_PASSWORD, sslContext=context)
+    content = si.RetrieveContent()
+
+    # Get VM Object
+    vm = get_obj(content, [vim.VirtualMachine], vm_name)
+    if not vm:
+        print(f"VM {vm_name} not found!")
+        Disconnect(si)
+        return
+
+  
+    guest = vm.guest
+
+    if guest.ipAddress:
+        Disconnect(si)
+        return guest.ipAddress
+    else:
+        print("IP Address: Not Assigned / VM Might be Off")
+        Disconnect(si)
+
 
 def deploy_vm(vm_name):
     context = ssl._create_unverified_context()
@@ -60,12 +86,24 @@ def deploy_vm(vm_name):
 
     task = template.Clone(folder=folder, name=vm_name, spec=clone_spec)
     print(f"Cloning {settings.TEMPLATE_NAME} to {vm_name} on {settings.ESXI_HOSTNAME}...")
+    
+    time.sleep(5)
 
     while task.info.state == vim.TaskInfo.State.running:
         continue  
 
     if task.info.state == vim.TaskInfo.State.success:
         print(f"VM {vm_name} created successfully with customization!")
+        print("getting ip address...")
+        ip_address = None  
+
+        while not ip_address:
+            time.sleep(5)
+            ip_address = get_ip(vm_name)
+        
+        print(f"VM {vm_name} IP Address: {ip_address}")
+        return ip_address  
+
     else:
         print(f"VM creation failed: {task.info.error}")
 
@@ -104,3 +142,6 @@ def delete_vm(vm_name):
         print(f"Failed to delete VM {vm_name}: {task.info.error}")
 
     Disconnect(si)
+
+
+

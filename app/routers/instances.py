@@ -30,8 +30,8 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
     name = instance.instance_name + "-" + current_user.username
     instance.instance_name = name
     instance_id , instance_ip = instReq.create_droplet(name)
-    vmReq.deploy_vm(name)
-    new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, **instance.dict())
+    database_ip = vmReq.deploy_vm(name)
+    new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, **instance.dict())
     db.add(new_instance)
     db.commit()
     db.refresh(new_instance)

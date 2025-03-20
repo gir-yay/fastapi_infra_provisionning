@@ -43,6 +43,7 @@ class InstanceResponse(BaseModel):
     id : int
     instance_name : str
     instance_ip : str
+    domain_name: Optional[str] = None
 
     class Config:
         orm_mode = True
