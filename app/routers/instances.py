@@ -34,8 +34,6 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
     instance_id , instance_ip = instReq.create_droplet(name)
     database_ip = vmReq.deploy_vm(name)
     runcmd.do_set_static_ip(instance_ip)
-    time.sleep(5)
-    database_ip = vmReq.get_ip(name)
     runcmd.run_ssh_command_vm(database_ip)
     new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, **instance.dict())
     db.add(new_instance)
