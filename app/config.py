@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     DATACENTER_NAME: str 
     ESXI_HOSTNAME: str
     CUSTOMIZATION_SPEC_NAME: str
+    DO_USERNAME : str
+    USERNAME: str
+    PASSWORD: str
+    
 
 
     class Config:

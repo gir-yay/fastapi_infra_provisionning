@@ -21,7 +21,7 @@ RUN pip install pydantic-settings
 RUN pip install python-digitalocean
 RUN pip install pyvmomi
 RUN pip install requests urllib3
-
+RUN pip install paramiko
 
 COPY . .
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0",  "--port", "8000"]

@@ -13,7 +13,7 @@ def create_droplet(droplet_name):
                                region='nyc3', # Amster
                                image='ubuntu-20-04-x64',
                                size_slug='s-1vcpu-1gb',  
-                               ssh_keys=[45450783],
+                               ssh_keys=[46292931],
                                monitoring=True, 
                                backups=False)
     droplet.create()
