@@ -75,7 +75,7 @@ jobs:
           pip install paramiko
           
 
-      - name: test with pytest
+      - name: Testing the code
         run: |
           pip install pytest
           sleep 10
@@ -93,7 +93,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghizlanera/hybrid_env_fastapi:latest
+          tags: ghizlanera/hybrid_env_fastapi:v0.0.1
     
       - name: Log out from Docker Hub
         run: docker logout
