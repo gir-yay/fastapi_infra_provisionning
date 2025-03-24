@@ -5,6 +5,8 @@ from .config import settings
 import time
 
 
+TEMPLATE_NAME = "vmtb"
+
 def get_obj(content, vimtype, name):
     obj = None
     container = content.viewManager.CreateContainerView(content.rootFolder, vimtype, True)
@@ -50,13 +52,14 @@ def deploy_vm(vm_name):
         Disconnect(si)
         return
     
-    host = get_obj(content, [vim.HostSystem], settings.ESXI_HOSTNAME)
-    if not host:
-        print(f"ESXi Host {settings.ESXI_HOSTNAME} not found!")
+    cluster = get_obj(content, [vim.ClusterComputeResource], settings.CLUSTER_NAME)
+    if not cluster:
+        print(f"Cluster {settings.CLUSTER_NAME} not found!")
         Disconnect(si)
-        return
+        return None
 
-    resource_pool = host.parent.resourcePool  
+    # Use the cluster’s resource pool
+    resource_pool = cluster.resourcePool
 
     datastore = get_obj(content, [vim.Datastore], settings.DATASTORE_NAME)
     if not datastore:
@@ -64,9 +67,9 @@ def deploy_vm(vm_name):
         Disconnect(si)
         return
 
-    template = get_obj(content, [vim.VirtualMachine], settings.TEMPLATE_NAME)
+    template = get_obj(content, [vim.VirtualMachine], TEMPLATE_NAME)
     if not template:
-        print(f"Template {settings.TEMPLATE_NAME} not found!")
+        print(f"Template {TEMPLATE_NAME} not found!")
         Disconnect(si)
         return
 
@@ -84,7 +87,7 @@ def deploy_vm(vm_name):
         clone_spec.customization = customization_spec.spec
 
     task = template.Clone(folder=folder, name=vm_name, spec=clone_spec)
-    print(f"Cloning {settings.TEMPLATE_NAME} to {vm_name} on {settings.ESXI_HOSTNAME}...")
+    print(f"Cloning {TEMPLATE_NAME} to {vm_name} on {settings.CLUSTER_NAME}...")
     
     time.sleep(5)
 

@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     DO_USERNAME : str
     USERNAME: str
     PASSWORD: str
+    CLUSTER_NAME: str
     
 
 
