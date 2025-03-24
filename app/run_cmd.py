@@ -31,7 +31,7 @@ def do_set_static_ip(droplet_ip):
 def run_ssh_command_vm(VM_IP):
     USERNAME = settings.USERNAME
     PASSWORD = settings.PASSWORD
-    COMMAND = "echo" +  PASSWORD + "| sudo -S ip route add 192.168.100.0/24 via 10.1.9.167" 
+    COMMAND = "echo " +  PASSWORD + "| sudo -S ip route add 192.168.100.0/24 via 10.1.9.167" 
     #COMMAND = "sudo ip route add 192.168.100.0/24 via 10.1.9.167"
     try:
         client = paramiko.SSHClient()
