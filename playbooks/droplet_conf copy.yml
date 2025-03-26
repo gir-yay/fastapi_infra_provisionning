@@ -1,0 +1,66 @@
+- name: Setup Docker and Deploy Odoo
+  hosts: "{{ target_host }}"
+  become: yes
+
+  vars:
+     server_ip: "{{ server_ip }}"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages to the latest version
+      apt:
+        upgrade: dist
+        cache_valid_time: 3600  
+
+    - name: Download Docker installation script
+      shell: curl -fsSL https://get.docker.com -o get-docker.sh
+
+    - name: Install Docker
+      shell: sudo sh ./get-docker.sh
+
+    - name: Ensure Docker service is running
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create odoo user if it doesn't exist
+      user:
+        name: odoo
+        shell: /bin/bash
+        state: present
+
+    - name: Ensure /opt/odoo directory exists
+      file:
+        path: /opt/odoo
+        state: directory
+        owner: odoo
+        group: odoo
+        mode: '0755'
+
+    - name: Run Odoo container
+      shell: >
+        docker run -d --name odoo
+        -p 8069:8069
+        -v /opt/odoo:/var/lib/odoo
+        -e HOST={{ server_ip }}
+        -e USER=odoo
+        -e DB_HOST={{ server_ip }}
+        -e PASSWORD=odoo
+        -e DB_NAME=odoo
+        -e DB_PORT=5432
+        odoo:latest
+
+    
+    - name: Update limit_time_real in odoo.conf
+      community.docker.docker_container_exec:
+        container: odoo
+        command: sed -i 's/^limit_time_real = .*/limit_time_real = 300/' /etc/odoo/odoo.conf
+
+    - name: Restart Odoo Container
+      community.docker.docker_container:
+        name: odoo
+        restart: true
