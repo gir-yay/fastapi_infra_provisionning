@@ -26,7 +26,8 @@ jobs:
       CUSTOMIZATION_SPEC_NAME: ${{secrets.CUSTOMIZATION_SPEC_NAME}}
       DO_USERNAME: ${{secrets.DO_USERNAME}}  
       USERNAME: ${{secrets.USERNAME}}  
-      PASSWORD: ${{secrets.PASSWORD}}  
+      PASSWORD: ${{secrets.PASSWORD}}
+      CLUSTER_NAME: ${{secrets.CLUSTER_NAME}}  
 
     services:
       postgres:
@@ -63,16 +64,8 @@ jobs:
       
       - name: installing requirements
         run: |
-          pip install fastapi[all]
-          pip install psycopg2
-          pip install passlib[bcrypt]
-          pip install python-jose[cryptography]
-          pip  install alembic
-          pip install pydantic-settings
-          pip install python-digitalocean
-          pip install pyvmomi
-          pip install requests urllib3
-          pip install paramiko
+          pip install wheel
+          pip install -r requirements.txt.old
           
 
       - name: Testing the code
@@ -87,13 +80,18 @@ jobs:
         with:
           username: ghizlanera
           password: ${{secrets.TOKEN}}
+      
+      - name: Set Version
+        run: echo "VERSION=1.0.${{ github.run_number }}" >> $GITHUB_ENV
+
+      
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: ghizlanera/hybrid_env_fastapi:latest
+          tags: ghizlanera/hybrid_env_fastapi:${{ env.VERSION }},ghizlanera/hybrid_env_fastapi:latest
     
       - name: Log out from Docker Hub
         run: docker logout
