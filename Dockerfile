@@ -12,16 +12,12 @@ RUN apt-get install -y python3-pip
 USER vscode
 WORKDIR /usr/src/app
 ENV PATH /home/vscode/.local/bin:${PATH}
-RUN pip install fastapi[all]
-RUN pip install psycopg2
-RUN pip install passlib[bcrypt]
-RUN pip install python-jose[cryptography]
-RUN pip  install alembic
-RUN pip install pydantic-settings
-RUN pip install python-digitalocean
-RUN pip install pyvmomi
-RUN pip install requests urllib3
-RUN pip install paramiko
+RUN pip install --upgrade pip
+RUN pip install wheel
+
+COPY requirements.txt.old .
+RUN pip install -r requirements.txt.old
+
 
 COPY . .
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0",  "--port", "8000"]
