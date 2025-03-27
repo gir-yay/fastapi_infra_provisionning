@@ -5,7 +5,7 @@ from ..database import  get_db
 from sqlalchemy.orm import Session
 
 from .. import instance_req as instReq
-from .. import vm_req as vmReq
+from .. import vm_req_cluster as vmReq
 from .. import run_cmd as runcmd
 import time
 

@@ -72,7 +72,7 @@
     - name: Run Odoo Container with Remote DB
       community.docker.docker_container:
         name: odoo
-        image: odoo
+        image: odoo:17
         restart_policy: always
         volumes:
           - "/opt/odoo_config/odoo.conf:/etc/odoo/odoo.conf"
