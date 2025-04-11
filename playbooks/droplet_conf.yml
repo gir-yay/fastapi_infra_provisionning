@@ -51,11 +51,29 @@
       ansible.builtin.package:
         name: python3-pip
         state: present  
-        
-    - name: Install Docker SDK for Python
-      ansible.builtin.pip:
+      
+    #- name: Install Docker SDK for Python
+    #  ansible.builtin.pip:
+    #    name: docker
+    #   executable: /usr/bin/pip3
+
+    - name: Install Python Docker SDK via apt
+      ansible.builtin.apt:
+        name: python3-docker
+        state: present
+    
+    - name: Download Docker installation script
+      shell: curl -fsSL https://get.docker.com -o get-docker.sh
+
+    - name: Install Docker
+      shell: sudo sh ./get-docker.sh
+
+    - name: Ensure Docker service is running
+      systemd:
         name: docker
-        executable: /usr/bin/pip3
+        state: started
+        enabled: yes
+
 
     - name: Copy Odoo configuration with Remote DB
       copy:
@@ -65,14 +83,13 @@
           db_port = 5432
           db_user = odoo
           db_password = odoo
-          limit_time_real = 6000
         dest: /opt/odoo_config/odoo.conf
         mode: '0644'
 
     - name: Run Odoo Container with Remote DB
       community.docker.docker_container:
         name: odoo
-        image: odoo:17
+        image: odoo:latest
         restart_policy: always
         volumes:
           - "/opt/odoo_config/odoo.conf:/etc/odoo/odoo.conf"
