@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     USERNAME: str
     PASSWORD: str
     CLUSTER_NAME: str
+    SSH_KEY_PATH: str
+    SSH_KEY_ID: int
+    IMAGE: str
+    REGION: str
+    SIZE_SLUG: str
+    VPC_UUID: str
     
 
 

@@ -3,6 +3,8 @@ from pyVmomi import vim
 import ssl
 from .config import settings
 import time
+import ipaddress
+
 
 
 def get_obj(content, vimtype, name):
@@ -14,7 +16,8 @@ def get_obj(content, vimtype, name):
             break
     container.Destroy()
     return obj
-
+    
+"""
 def get_ip(vm_name):
     context = ssl._create_unverified_context()
 
@@ -37,6 +40,45 @@ def get_ip(vm_name):
         return guest.ipAddress
     else:
         Disconnect(si)
+
+""" 
+
+def get_ip(vm_name):
+    context = ssl._create_unverified_context()
+
+    si = SmartConnect(
+        host=settings.VCENTER_HOST,
+        user=settings.VCENTER_USER,
+        pwd=settings.VCENTER_PASSWORD,
+        sslContext=context
+    )
+    content = si.RetrieveContent()
+
+    vm = get_obj(content, [vim.VirtualMachine], vm_name)
+    if not vm:
+        print(f"VM {vm_name} not found!")
+        Disconnect(si)
+        return None
+
+    ip_address = None
+    for nic in vm.guest.net:
+        for addr in nic.ipAddress:
+            try:
+                ip = ipaddress.ip_address(addr)
+                if ip.version == 4:
+                    ip_address = str(ip)
+                    break
+            except ValueError:
+                continue
+        if ip_address:
+            break
+
+    Disconnect(si)
+
+    if ip_address:
+        return ip_address
+    else:
+        return None
 
 
 def deploy_vm(vm_name):
@@ -97,9 +139,12 @@ def deploy_vm(vm_name):
         ip_address = None  
 
         while not ip_address:
-            time.sleep(5)
+            
             ip_address = get_ip(vm_name)
-        
+            if not ip_address:
+                time.sleep(10)
+
+
         print(f"VM {vm_name} IP Address: {ip_address}")
         return ip_address  
 

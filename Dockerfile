@@ -8,12 +8,14 @@ RUN apt-get update && apt-get install -y
 RUN apt-get install -y libpq-dev
 RUN apt-get install -y python3-pip
 
+
 # Set vscode as the default user
 USER vscode
 WORKDIR /usr/src/app
 ENV PATH /home/vscode/.local/bin:${PATH}
 RUN pip install --upgrade pip
 RUN pip install wheel
+
 
 COPY requirements.txt.old .
 RUN pip install -r requirements.txt.old

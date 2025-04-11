@@ -9,6 +9,7 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./:/usr/src/app:rw
+      - /home/gg/.ssh:/home/vscode/.ssh
     depends_on:
       - db
       
@@ -24,3 +25,4 @@ services:
 
 volumes:
   postgresDB_data:
+

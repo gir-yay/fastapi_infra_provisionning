@@ -5,7 +5,7 @@ from ..database import  get_db
 from sqlalchemy.orm import Session
 
 from .. import instance_req as instReq
-from .. import vm_req_cluster as vmReq
+from .. import vm_req as vmReq
 from .. import run_cmd as runcmd
 import time
 
@@ -33,9 +33,8 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
     instance.instance_name = name
     instance_id , instance_ip = instReq.create_droplet(name)
     database_ip = vmReq.deploy_vm(name)
-    runcmd.do_set_static_ip(instance_ip)
-    #runcmd.run_ssh_command_vm(database_ip)
-    new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, **instance.dict())
+    runcmd.do_set_static_route(instance_ip)
+    new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, domain_name= f"{name}.kounhany.tech" , **instance.dict())
     db.add(new_instance)
     db.commit()
     db.refresh(new_instance)
