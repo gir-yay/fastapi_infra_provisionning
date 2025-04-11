@@ -1,13 +1,14 @@
 import paramiko
 from .config import settings
 #from paramiko import RSAKey
-
+import os
 
 
 
 def do_set_static_route(droplet_ip):
     ssh_user = settings.DO_USERNAME  
-    ssh_key_path = settings.SSH_KEY_PATH
+    ssh_key_path =  os.path.expanduser(settings.SSH_KEY_PATH)
+     
     #PASSWORD = settings.PASSWORD 
     #ssh_key = RSAKey(filename=ssh_key_path, password=PASSWORD)
 
