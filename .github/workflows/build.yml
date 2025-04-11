@@ -28,6 +28,12 @@ jobs:
       USERNAME: ${{secrets.USERNAME}}  
       PASSWORD: ${{secrets.PASSWORD}}
       CLUSTER_NAME: ${{secrets.CLUSTER_NAME}}  
+      SSH_KEY_PATH: ${{secrets.SSH_KEY_PATH}}
+      SSH_KEY_ID: ${{secrets.SSH_KEY_ID}}
+      IMAGE: ${{secrets.IMAGE}}
+      REGION: ${{secrets.REGION}}
+      SIZE_SLUG: ${{secrets.SIZE_SLUG}}
+      VPC_UUID: ${{secrets.VPC_UUID}}
 
     services:
       postgres:
