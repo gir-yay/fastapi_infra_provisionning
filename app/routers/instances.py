@@ -8,6 +8,10 @@ from .. import instance_req as instReq
 from .. import vm_req as vmReq
 from .. import run_cmd as runcmd
 import time
+import subprocess, os
+from ..config import settings
+
+
 
 
 router = APIRouter(
@@ -32,8 +36,25 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
     name = instance.instance_name + "-" + current_user.username
     instance.instance_name = name
     instance_id , instance_ip = instReq.create_droplet(name)
-    database_ip = vmReq.deploy_vm(name)
-    runcmd.do_set_static_route(instance_ip)
+    #database_ip = vmReq.deploy_vm(name)
+    #runcmd.do_set_static_route(instance_ip)
+    database_ip = "192.168.100.4"
+    time.sleep(5)
+    ssh_key_path =  os.path.expanduser(settings.SSH_KEY_PATH)
+
+    env = os.environ.copy()  
+    env["PATH"] += ":/home/vscode/.local/bin"
+
+    subprocess.run([
+        "ansible-playbook",
+        "/usr/src/app/playbooks/droplet_conf.yml",
+        "-i", f"{instance_ip},",  
+        "-u", "root",
+        "--private-key", ssh_key_path,
+        "-e", f"target_host={instance_ip} server_ip={database_ip}",
+        "-e", "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
+    ], env=env)
+
     new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, domain_name= f"{name}.kounhany.tech" , **instance.dict())
     db.add(new_instance)
     db.commit()
@@ -50,7 +71,7 @@ def delete_instance(id: int , db: Session = Depends(get_db), current_user: int =
             raise HTTPException(status_code= status.HTTP_403_FORBIDDEN , detail="Instance does not exist!")
         db.delete(instance)
         instReq.delete_droplet(instance.instance_id)
-        vmReq.delete_vm(instance.instance_name)
+        #vmReq.delete_vm(instance.instance_name)
         db.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     raise HTTPException(status_code= status.HTTP_404_NOT_FOUND , detail="Instance not found")

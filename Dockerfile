@@ -15,6 +15,7 @@ WORKDIR /usr/src/app
 ENV PATH /home/vscode/.local/bin:${PATH}
 RUN pip install --upgrade pip
 RUN pip install wheel
+RUN pip install ansible
 
 
 COPY requirements.txt.old .

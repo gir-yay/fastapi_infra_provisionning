@@ -3,95 +3,73 @@
   become: yes
 
   vars:
-     server_ip: "{{ server_ip }}"
+    server_ip: "{{ server_ip }}"
+    odoo_config_dir: /opt/odoo_config
 
   tasks:
-    - name: Update apt cache
-      apt:
+    - name: Ensure apt cache is updated
+      ansible.builtin.apt:
         update_cache: yes
+        cache_valid_time: 3600
 
-    - name: Upgrade all packages to the latest version
-      apt:
-        upgrade: dist
-        cache_valid_time: 3600  
-
-    - name: Download Docker installation script
-      shell: curl -fsSL https://get.docker.com -o get-docker.sh
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - curl
+          - python3-pip
+          - python3-docker
+        state: present
 
     - name: Install Docker
-      shell: sudo sh ./get-docker.sh
+      shell: curl -fsSL https://get.docker.com | sh
+      args:
+        creates: /usr/bin/docker
 
     - name: Ensure Docker service is running
-      systemd:
+      ansible.builtin.service:
         name: docker
         state: started
         enabled: yes
 
-    - name: Create odoo user if it doesn't exist
-      user:
+    - name: Create odoo user if not exists
+      ansible.builtin.user:
         name: odoo
         shell: /bin/bash
         state: present
 
-    - name: Ensure /opt/odoo directory exists
-      file:
-        path: /opt/odoo
+    - name: Create Odoo config directory
+      ansible.builtin.file:
+        path: "{{ odoo_config_dir }}"
         state: directory
         owner: odoo
         group: odoo
         mode: '0755'
 
-    - name: Create Odoo config directory
-      file:
-        path: /opt/odoo_config
-        state: directory
-        mode: '0755'
-
-    - name: Install pip3 if not already installed
-      ansible.builtin.package:
-        name: python3-pip
-        state: present  
-      
-    #- name: Install Docker SDK for Python
-    #  ansible.builtin.pip:
-    #    name: docker
-    #   executable: /usr/bin/pip3
-
-    - name: Install Python Docker SDK via apt
-      ansible.builtin.apt:
-        name: python3-docker
-        state: present
-    
-    - name: Download Docker installation script
-      shell: curl -fsSL https://get.docker.com -o get-docker.sh
-
-    - name: Install Docker
-      shell: sudo sh ./get-docker.sh
-
-    - name: Ensure Docker service is running
-      systemd:
-        name: docker
-        state: started
-        enabled: yes
-
-
-    - name: Copy Odoo configuration with Remote DB
-      copy:
+    - name: Copy Odoo configuration for remote DB
+      ansible.builtin.copy:
+        dest: "{{ odoo_config_dir }}/odoo.conf"
         content: |
           [options]
           db_host = {{ server_ip }}
           db_port = 5432
           db_user = odoo
           db_password = odoo
-        dest: /opt/odoo_config/odoo.conf
         mode: '0644'
 
-    - name: Run Odoo Container with Remote DB
+    - name: Pull Odoo image
+      community.docker.docker_image:
+        name: odoo
+        source: pull
+
+    - name: Run Odoo container
       community.docker.docker_container:
         name: odoo
         image: odoo:latest
         restart_policy: always
         volumes:
-          - "/opt/odoo_config/odoo.conf:/etc/odoo/odoo.conf"
+          - "{{ odoo_config_dir }}/odoo.conf:/etc/odoo/odoo.conf"
         ports:
           - "8069:8069"
+        env:
+          HOST: "{{ server_ip }}"
+        state: started
