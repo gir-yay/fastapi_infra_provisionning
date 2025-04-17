@@ -34,12 +34,13 @@ def get_instace( db: Session = Depends(get_db), current_user: int = Depends(oaut
 @router.post("/",  status_code=status.HTTP_201_CREATED , response_model=schemas.InstanceResponse)
 def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     name = instance.instance_name + "-" + current_user.username
+    dname = instance.instance_name + "." + current_user.username
     instance.instance_name = name
     instance_id , instance_ip = instReq.create_droplet(name)
     #database_ip = vmReq.deploy_vm(name)
     #runcmd.do_set_static_route(instance_ip)
     database_ip = "192.168.100.4"
-    time.sleep(5)
+    time.sleep(20)
     ssh_key_path =  os.path.expanduser(settings.SSH_KEY_PATH)
 
     env = os.environ.copy()  
@@ -54,8 +55,9 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
         "-e", f"target_host={instance_ip} server_ip={database_ip}",
         "-e", "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
     ], env=env)
+    instReq.add_dns_record(dname, instance_ip)
 
-    new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, domain_name= f"{name}.kounhany.tech" , **instance.dict())
+    new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, domain_name= f"{dname}.{settings.DOMAIN_NAME}" , **instance.dict())
     db.add(new_instance)
     db.commit()
     db.refresh(new_instance)
@@ -71,6 +73,7 @@ def delete_instance(id: int , db: Session = Depends(get_db), current_user: int =
             raise HTTPException(status_code= status.HTTP_403_FORBIDDEN , detail="Instance does not exist!")
         db.delete(instance)
         instReq.delete_droplet(instance.instance_id)
+        instReq.delete_dns_record(instance.instance_name.replace("-", "."))
         #vmReq.delete_vm(instance.instance_name)
         db.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)

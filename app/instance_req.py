@@ -52,3 +52,32 @@ def delete_droplet(droplet_id):
     print("Droplet destroyed.")
 
 
+
+def add_dns_record(name, ip_address):
+    domain_obj = digitalocean.Domain(token=manager.token, name=settings.DOMAIN_NAME)
+    
+    record = digitalocean.Record(
+        token=manager.token,
+        domain=domain_obj,
+        type='A',
+        name=name,  
+        data=ip_address,
+        ttl=3600
+    )
+    record.create()
+    print(f"DNS A record created: {name}.{settings.DOMAIN_NAME} -> {ip_address}")
+
+
+def delete_dns_record(name):
+    domain_obj = digitalocean.Domain(token=manager.token, name=settings.DOMAIN_NAME)
+    records = domain_obj.get_records()
+
+    for record in records:
+        if record.name == name and record.type == "A":
+            record.destroy()
+            print(f"Deleted A record: {name}.{settings.DOMAIN_NAME}")
+            return True
+    print(f"No matching A record found for: {name}.{settings.DOMAIN_NAME}")
+    return False
+
+

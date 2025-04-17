@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     REGION: str
     SIZE_SLUG: str
     VPC_UUID: str
+    DOMAIN_NAME: str
     
 
 

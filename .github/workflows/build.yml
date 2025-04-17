@@ -34,6 +34,7 @@ jobs:
       REGION: ${{secrets.REGION}}
       SIZE_SLUG: ${{secrets.SIZE_SLUG}}
       VPC_UUID: ${{secrets.VPC_UUID}}
+      DOMAIN_NAME: ${{secrets.DOMAIN_NAME}}
 
     services:
       postgres:
