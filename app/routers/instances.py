@@ -35,8 +35,11 @@ def get_instace( db: Session = Depends(get_db), current_user: int = Depends(oaut
 def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     name = instance.instance_name + "-" + current_user.username
     dname = instance.instance_name + "." + current_user.username
+    domain_name= f"{dname}.{settings.DOMAIN_NAME}"
     instance.instance_name = name
     instance_id , instance_ip = instReq.create_droplet(name)
+    lb_ip = "138.197.48.39"
+    reverse_proxy_ip = "165.227.215.84"
     #database_ip = vmReq.deploy_vm(name)
     #runcmd.do_set_static_route(instance_ip)
     database_ip = "192.168.100.4"
@@ -45,7 +48,7 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
 
     env = os.environ.copy()  
     env["PATH"] += ":/home/vscode/.local/bin"
-
+    
     subprocess.run([
         "ansible-playbook",
         "/usr/src/app/playbooks/droplet_conf.yml",
@@ -55,9 +58,11 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
         "-e", f"target_host={instance_ip} server_ip={database_ip}",
         "-e", "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
     ], env=env)
-    instReq.add_dns_record(dname, instance_ip)
+    
+    instReq.add_dns_record(dname, lb_ip)
+    runcmd.setup_nginx_reverse_proxy(reverse_proxy_ip, instance_ip, domain_name, name)
 
-    new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, domain_name= f"{dname}.{settings.DOMAIN_NAME}" , **instance.dict())
+    new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, domain_name= domain_name , **instance.dict())
     db.add(new_instance)
     db.commit()
     db.refresh(new_instance)
