@@ -40,11 +40,11 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
     instance_id , instance_ip = instReq.create_droplet(name)
     lb_ip = settings.LB_IP
     reverse_proxy_ip = settings.REVERSE_PROXY_IP
-    #database_ip = vmReq.deploy_vm(name)
-    #runcmd.do_set_static_route(instance_ip)
-    database_ip = "192.168.100.4"
+    database_ip = vmReq.deploy_vm(name)
+    runcmd.do_set_static_route(instance_ip)
+    #database_ip = "192.168.100.4"
     
-    time.sleep(60)
+    #time.sleep(60)
 
     runcmd.setup_docker_remote(instance_ip)
 
@@ -89,7 +89,7 @@ def delete_instance(id: int , db: Session = Depends(get_db), current_user: int =
         
         instReq.delete_droplet(instance.instance_id)
         
-        #vmReq.delete_vm(instance.instance_name)
+        vmReq.delete_vm(instance.instance_name)
         db.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     raise HTTPException(status_code= status.HTTP_404_NOT_FOUND , detail="Instance not found")
