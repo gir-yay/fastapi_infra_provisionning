@@ -1,4 +1,4 @@
-- name: Setup Docker and Deploy Odoo
+- name: Deploy Odoo in Docker
   hosts: "{{ target_host }}"
   become: yes
 
@@ -7,38 +7,6 @@
     odoo_config_dir: /opt/odoo_config
 
   tasks:
-
-    - name: Wait for apt lock to be released (if any)
-      shell: |
-        while fuser /var/lib/dpkg/lock; do
-          sleep 1;
-        done
-      async: 300
-      poll: 0
-
-    - name: Ensure apt cache is updated
-      ansible.builtin.apt:
-        update_cache: yes
-        cache_valid_time: 3600
-
-    - name: Install required packages
-      ansible.builtin.apt:
-        name:
-          - curl
-          - python3-pip
-          - python3-docker
-        state: present
-
-    - name: Install Docker
-      shell: curl -fsSL https://get.docker.com | sh
-      args:
-        creates: /usr/bin/docker
-
-    - name: Ensure Docker service is running
-      ansible.builtin.service:
-        name: docker
-        state: started
-        enabled: yes
 
     - name: Create odoo user if not exists
       ansible.builtin.user:

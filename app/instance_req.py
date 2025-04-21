@@ -8,6 +8,8 @@ manager = digitalocean.Manager(token=settings.DO_API_KEY)
 
 
 def create_droplet(droplet_name):
+
+    
     droplet = digitalocean.Droplet(token=manager.token,
                                name= droplet_name,
                                region= settings.REGION, 
@@ -17,7 +19,8 @@ def create_droplet(droplet_name):
                                ssh_keys=[settings.SSH_KEY_ID], 
                                monitoring=True, 
                                backups=False,
-                               tags=["Internal"])
+                               tags=["Internal"]
+                               )
     droplet.create()
     
     droplet_id = None

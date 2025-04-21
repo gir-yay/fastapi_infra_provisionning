@@ -31,7 +31,8 @@ class Settings(BaseSettings):
     SIZE_SLUG: str
     VPC_UUID: str
     DOMAIN_NAME: str
-    
+    LB_IP: str
+    REVERSE_PROXY_IP: str
 
 
     class Config:
