@@ -34,7 +34,7 @@ def get_instace( db: Session = Depends(get_db), current_user: int = Depends(oaut
 @router.post("/",  status_code=status.HTTP_201_CREATED , response_model=schemas.InstanceResponse)
 def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     name = instance.instance_name + "-" + current_user.username
-    dname = instance.instance_name + "." + current_user.username
+    dname = instance.instance_name + "-" + current_user.username
     domain_name= f"{dname}.{settings.DOMAIN_NAME}"
     instance.instance_name = name
     instance_id , instance_ip = instReq.create_droplet(name)
@@ -85,7 +85,7 @@ def delete_instance(id: int , db: Session = Depends(get_db), current_user: int =
             raise HTTPException(status_code= status.HTTP_403_FORBIDDEN , detail="Instance does not exist!")
         db.delete(instance)
         runcmd.delete_nginx_reverse_proxy_config(reverse_proxy_ip , instance.instance_name)
-        instReq.delete_dns_record(instance.instance_name.replace("-", "."))
+        instReq.delete_dns_record(instance.instance_name)
         
         instReq.delete_droplet(instance.instance_id)
         
