@@ -1,6 +1,5 @@
 name : CI/CD pipline
 on: 
-  workfolw_dispatch:
   push:
     branches:
         - "main"
