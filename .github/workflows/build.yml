@@ -70,7 +70,6 @@ jobs:
       
       - name: update pip
         run: |
-          sudo apt-get install -y libpq-dev 
           python3 -m pip install --upgrade pip
 
       
