@@ -1,0 +1,26 @@
+services:
+  api:
+    image: ghizlanera/hybrid_env_fastapi:latest
+    container_name: fastapi
+    ports:
+      - "5000:8000"
+    env_file:
+      - .env
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - /home/gg/.ssh:/home/vscode/.ssh
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgresDB_data:/var/lib/postgresql/data
+
+volumes:
+  postgresDB_data:

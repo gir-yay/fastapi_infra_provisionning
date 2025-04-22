@@ -1,5 +1,6 @@
 name : CI/CD pipline
 on: 
+  workfolw_dispatch:
   push:
     branches:
         - "main"
@@ -55,7 +56,7 @@ jobs:
           --health-retries 5
 
 
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, do, api]
     steps:
       - name: checking the repository
         uses: actions/checkout@v2
@@ -104,3 +105,15 @@ jobs:
     
       - name: Log out from Docker Hub
         run: docker logout
+
+      
+      - name: deploy to ubuntu server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.PROD_HOST}}
+          username: ${{secrets.PROD_USERNAME}}
+          password: ${{secrets.PROD_PASSWORD}}
+          script: |
+            docker-compose pull api
+            docker-compose up -d api
+
