@@ -35,6 +35,8 @@ jobs:
       SIZE_SLUG: ${{secrets.SIZE_SLUG}}
       VPC_UUID: ${{secrets.VPC_UUID}}
       DOMAIN_NAME: ${{secrets.DOMAIN_NAME}}
+      LB_IP: ${{secrets.LB_IP}}
+      REVERSE_PROXY_IP: ${{secrets.REVERSE_PROXY_IP}}
 
     services:
       postgres:
