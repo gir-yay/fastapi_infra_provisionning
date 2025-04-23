@@ -77,7 +77,7 @@ jobs:
       - name: installing requirements
         run: |
           pip install wheel
-          pip install -r requirements.txt.old
+          pip install -r requirements.txt.test
           
 
       - name: Testing the code
