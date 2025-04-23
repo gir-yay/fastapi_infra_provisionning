@@ -6,7 +6,7 @@ services:
       - "5000:8000"
     env_file:
       - .env
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     volumes:
       - /home/gg/.ssh:/home/vscode/.ssh
     depends_on:
