@@ -119,6 +119,8 @@ jobs:
         with:
           host: ${{secrets.PROD_HOST}}
           username: ${{secrets.PROD_USERNAME}}
+          key: ${{secrets.PROD_KEY}}
+
           script: |
             docker compose down api
             docker compose pull api
