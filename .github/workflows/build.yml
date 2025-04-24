@@ -123,7 +123,6 @@ jobs:
           key: ${{secrets.PROD_KEY}}
 
           script: |
-            docker compose down api
-            docker compose pull api
-            docker compose up -d 
+            docker pull ghizlanera/hybrid_env_fastapi:latest
+            docker service update --image ghizlanera/hybrid_env_fastapi:latest api-stack_api
 
