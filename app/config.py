@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     DOMAIN_NAME: str
     LB_IP: str
     REVERSE_PROXY_IP: str
+    PROMETHEUS_IP: str
 
 
     class Config:

@@ -2,6 +2,7 @@ import paramiko
 from .config import settings
 #from paramiko import RSAKey
 import os
+import json
 
 
 
@@ -131,5 +132,65 @@ def setup_docker_remote(droplet_ip):
 
     except Exception as e:
         print(f"SSH connection failed: {e}")
+    finally:
+        ssh.close()
+
+
+
+
+def create_prometheus_target_file(hostname, database_ip, droplet_name):
+
+    target_file_path = f"/etc/prometheus/targets/{droplet_name}.json"
+    data = [
+        {
+            "targets": [f"{database_ip}:9100"],
+            "labels": {
+                "job": "vsphere",
+                "datacenter": "DC2",
+                "instance": f"{droplet_name}",
+            }
+        }
+    ]
+    
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(hostname, username=settings.USERNAME, password=settings.PASSWORD)
+        json_data = json.dumps(data, indent=2)
+        command = f'echo \'{json_data}\' | sudo tee {target_file_path} > /dev/null'
+
+        stdin, stdout, stderr = ssh.exec_command(command)
+        error = stderr.read().decode()
+        if error:
+            print(f"Error creating file: {error}")
+        else:
+            print(f"File successfully created at {target_file_path}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    finally:
+        ssh.close()
+
+
+def delete_prometheus_target_file(hostname, droplet_name):
+    target_file_path = f"/etc/prometheus/targets/{droplet_name}.json"
+    
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(hostname, username=settings.USERNAME, password=settings.PASSWORD)
+        command = f'sudo rm {target_file_path}'
+
+        stdin, stdout, stderr = ssh.exec_command(command)
+        error = stderr.read().decode()
+        if error:
+            print(f"Error deleting file: {error}")
+        else:
+            print(f"File successfully deleted at {target_file_path}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
     finally:
         ssh.close()

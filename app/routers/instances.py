@@ -68,6 +68,8 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
     instReq.add_dns_record(dname, lb_ip)
     runcmd.setup_nginx_reverse_proxy(reverse_proxy_ip, instance_ip, domain_name, name)
 
+    runcmd.create_prometheus_target_file(settings.PROMETHEUS_IP ,database_ip, name)
+
     new_instance = models.Instances(owner_id= current_user.id,  instance_id=instance_id, instance_ip=instance_ip, database_ip = database_ip, domain_name= domain_name , **instance.dict())
     db.add(new_instance)
     db.commit()
@@ -89,6 +91,8 @@ def delete_instance(id: int , db: Session = Depends(get_db), current_user: int =
         
         instReq.delete_droplet(instance.instance_id)
         
+        runcmd.delete_prometheus_target_file(settings.PROMETHEUS_IP, instance.instance_name)
+
         vmReq.delete_vm(instance.instance_name)
         db.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
