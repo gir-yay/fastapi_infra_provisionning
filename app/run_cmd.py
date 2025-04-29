@@ -157,7 +157,7 @@ def create_prometheus_target_file(hostname, database_ip, droplet_name):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(hostname, username=settings.USERNAME, password=settings.PASSWORD)
         json_data = json.dumps(data, indent=2)
-        command = f'echo \'{json_data}\' | sudo tee -S {target_file_path} > /dev/null'
+        command = f'echo \'{json_data}\' | sudo -S tee {target_file_path} > /dev/null'
 
         stdin, stdout, stderr = ssh.exec_command(command)
         error = stderr.read().decode()
