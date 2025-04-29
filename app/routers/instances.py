@@ -52,6 +52,16 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
 
     env = os.environ.copy()  
     env["PATH"] += ":/home/vscode/.local/bin"
+
+    subprocess.run([
+        "ansible-playbook",
+        "/usr/src/app/playbooks/node_exporter.yml",
+        "-i", f"{instance_ip},",  
+        "-u", "root",
+        "--private-key", ssh_key_path,
+        "-e", f"target_host={instance_ip}",
+        "-e", "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
+    ], env=env)
     
     subprocess.run([
         "ansible-playbook",
