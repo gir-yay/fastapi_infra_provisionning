@@ -41,6 +41,7 @@ jobs:
       DOMAIN_NAME: ${{secrets.DOMAIN_NAME}}
       LB_IP: ${{secrets.LB_IP}}
       REVERSE_PROXY_IP: ${{secrets.REVERSE_PROXY_IP}}
+      PROMETHEUS_IP: ${{secrets.PROMETHEUS_IP}}
 
     services:
       postgres:
