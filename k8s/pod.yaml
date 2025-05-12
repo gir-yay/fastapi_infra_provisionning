@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql-test-pod
+spec:
+  containers:
+    - name: mysql
+      image: mysql:5.7
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "password"
+      volumeMounts:
+        - name: shared-storage
+          mountPath: /var/lib/mysql   # MySQL data directory
+  volumes:
+    - name: shared-storage
+      persistentVolumeClaim:
+        claimName: cluster-shared-pvc  # Ensure this PVC exists
+
+
+
+
+# in every node
+# sudo apt-get update
+# sudo apt-get install nfs-common
