@@ -11,7 +11,8 @@ spec:
           value: "password"
       volumeMounts:
         - name: shared-storage
-          mountPath: /var/lib/mysql   # MySQL data directory
+          mountPath: /var/lib/mysql
+          subPath: mysql-test-pod
   volumes:
     - name: shared-storage
       persistentVolumeClaim:
