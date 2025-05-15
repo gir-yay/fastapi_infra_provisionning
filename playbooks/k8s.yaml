@@ -1,0 +1,107 @@
+---
+- name: Bootstrap Kubernetes Worker Node (with containerd & k8s v1.29)
+  hosts: "{{ target_host }}"
+  become: yes
+  vars:
+    kubeadm_join_command: "kubeadm join 192.168.100.9:6443 --token gbqme7.pvwdcnhtykcbabbb --discovery-token-ca-cert-hash sha256:65f908786bad5a89ce7ff25bd7ba049bd18953eb250da07741957b426b6ad0f9"  
+
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install containerd
+      apt:
+        name: containerd
+        state: present
+
+    - name: Ensure containerd service is running
+      systemd:
+        name: containerd
+        state: started
+        enabled: yes
+
+    - name: Create containerd config directory
+      file:
+        path: /etc/containerd
+        state: directory
+
+    - name: Generate default containerd config
+      command: containerd config default
+      register: containerd_config
+
+    - name: Write containerd config to file
+      copy:
+        content: "{{ containerd_config.stdout }}"
+        dest: /etc/containerd/config.toml
+
+    - name: Set SystemdCgroup to true in containerd config
+      replace:
+        path: /etc/containerd/config.toml
+        regexp: '^( +)SystemdCgroup = false'
+        replace: '\1SystemdCgroup = true'
+
+    - name: Ensure swap is disabled now
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+
+    - name: Disable swap permanently
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*swap.*)$'
+        replace: '# \1'
+
+    - name: Enable ip forwarding in sysctl.conf
+      lineinfile:
+        path: /etc/sysctl.conf
+        regexp: '^net.ipv4.ip_forward='
+        line: 'net.ipv4.ip_forward=1'
+        state: present
+
+    - name: Load br_netfilter module on boot
+      copy:
+        dest: /etc/modules-load.d/k8s.conf
+        content: |
+          br_netfilter
+
+    - name: Apply sysctl settings immediately
+      command: sysctl -p
+
+    - name: Reboot node to apply kernel modules and swap off
+      reboot:
+        reboot_timeout: 300
+
+    - name: Ensure /etc/apt/keyrings directory exists
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+
+    - name: Download Kubernetes GPG key and dearmor it
+      shell: curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | gpg --dearmor | tee /etc/apt/keyrings/kubernetes-apt-keyring.gpg > /dev/null
+      args:
+        creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+
+    - name: Add Kubernetes apt repo
+      copy:
+        dest: /etc/apt/sources.list.d/kubernetes.list
+        content: |
+          deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /
+
+    - name: Update apt cache again
+      apt:
+        update_cache: yes
+
+    - name: Install kubelet, kubeadm, kubectl
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+
+
+    - name: Join node to the cluster
+      shell: "{{ kubeadm_join_command }}"
+      
