@@ -1,0 +1,126 @@
+# -------------------------------
+# PostgreSQL Deployment (no PVC)
+# -------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          env:
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_USER
+              value: odoo
+            - name: POSTGRES_PASSWORD
+              value: odoo
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+# -------------------------------
+# PostgreSQL Service
+# -------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: postgres
+---
+# -------------------------------
+# Odoo Deployment with init container to wait for Postgres
+# -------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odoo
+  template:
+    metadata:
+      labels:
+        app: odoo
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z postgres 5432; do
+                echo "Waiting for Postgres..."
+                sleep 3
+              done
+      containers:
+        - name: odoo
+          image: odoo:17
+          env:
+            - name: HOST
+              value: postgres
+            - name: USER
+              value: odoo
+            - name: PASSWORD
+              value: odoo
+          ports:
+            - containerPort: 8069
+---
+# -------------------------------
+# Odoo Service
+# -------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: odoo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8069
+      targetPort: 8069
+  selector:
+    app: odoo
+---
+# -------------------------------
+# Ingress for Odoo (nginx ingress)
+# -------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: odoo-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: odoo-user.giryay.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo
+                port:
+                  number: 8069
