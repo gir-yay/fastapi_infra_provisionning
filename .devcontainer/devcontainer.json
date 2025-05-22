@@ -20,5 +20,14 @@
 		}
 	},
 	
-	"remoteUser": "vscode"
+	"remoteUser": "vscode",
+
+	"mounts": [
+  		"source=${localEnv:HOME}/kubeconfig-do,target=/home/vscode/.kube/config,type=bind"
+	],
+	
+	"remoteEnv": {
+  		"KUBECONFIG": "/home/vscode/.kube/config"
+	}
+
 }

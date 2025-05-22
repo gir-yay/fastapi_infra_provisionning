@@ -22,9 +22,6 @@ class Instances(Base):
     id = Column(Integer, primary_key=True, index=True, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     instance_name = Column(String, nullable=False, unique=True)
-    instance_id = Column(Integer, nullable=False)
-    instance_ip = Column(String, nullable=False)
-    database_ip = Column(String)
     domain_name = Column(String, unique=True)
     
     owner = relationship("Users")
