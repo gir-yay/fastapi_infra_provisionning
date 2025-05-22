@@ -39,6 +39,7 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
     instance.instance_name = name
     lb_ip = settings.LB_IP
     instReq.add_dns_record(name, lb_ip)
+    k8s.deploy_odoo(name)
 
     
     new_instance = models.Instances(owner_id= current_user.id, domain_name= domain_name , **instance.dict())
@@ -50,6 +51,19 @@ def create_instance(instance : schemas.InstanceCreate , db: Session = Depends(ge
 
 @router.delete("/{id}" , status_code=status.HTTP_204_NO_CONTENT)
 def delete_instance(id: int , db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    pass
+    instance_query = db.query(models.Instances).filter(models.Instances.id == id)
+    instance = instance_query.first()
+    if not instance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instance not found")
+    
+    if instance.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
+    
+    # Delete the instance
+    k8s.delete_odoo(instance.instance_name)
+    instReq.delete_dns_record(instance.instance_name)
+    instance_query.delete(synchronize_session=False)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
     
 
