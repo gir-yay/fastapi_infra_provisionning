@@ -30,3 +30,7 @@ spec:
                 secretKeyRef:
                   name: do-secret
                   key: DO_TOKEN
+
+
+
+# kubectl create secret generic do-secret --from-literal=DO_TOKEN=paste_token here
