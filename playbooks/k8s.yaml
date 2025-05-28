@@ -104,4 +104,12 @@
 
     - name: Join node to the cluster
       shell: "{{ kubeadm_join_command }}"
+
+
+
+
+
+
+# ansible-playbook k8s.yml -i 159.65.36.62, --extra-vars "target_host=159.65.36.62" -u root --private-key=/root/.ssh/dokey2
+
       
