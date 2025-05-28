@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoscaler
+  labels:
+    app: autoscaler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: autoscaler
+  template:
+    metadata:
+      labels:
+        app: autoscaler
+    spec:
+      serviceAccountName: autoscaler-sa
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+      tolerations:
+        - key: "node-role.kubernetes.io/control-plane"
+          operator: "Exists"
+          effect: "NoSchedule"
+      containers:
+        - name: autoscaler
+          image: ghizlanera/custom-autoscaler:latest
+          env:
+            - name: DO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: do-secret
+                  key: DO_TOKEN
